@@ -1,0 +1,7 @@
+{
+  "buildCommand": "",
+  "buildOutputPath": "main.exe",
+  "runCommand": "<<file>>",
+  "buildArgs": null,
+  "runArgs": null
+}

@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <script>
+      async function callApi() {
+        console.log("Calling API...");
+
+        const textbox = document.getElementById("inputText");
+        const inputText = textbox.value;
+
+        const result = await fetch("/api", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ input: inputText }),
+        });
+        const text = await result.text();
+        const element = document.createElement("p");
+        element.textContent = text;
+        document.body.appendChild(element);
+      }
+    </script>
+  </head>
+  <body>
+    <p>Hello sir, this backend is in JS!</p>
+    <textarea id="inputText" rows="4" cols="50"></textarea>
+    <button onclick="callApi()">Call API</button>
+  </body>
+</html>

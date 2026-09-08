@@ -1,0 +1,7 @@
+{
+  "buildCommand": "gcc",
+  "buildOutputPath": "",
+  "runCommand": "<<file>>",
+  "buildArgs": ["<<source_file>>", "-o", "<<output_folder>>/main.exe"],
+  "runArgs": null
+}
