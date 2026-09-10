@@ -1,0 +1,14 @@
+{
+  "buildCommand": "cargo",
+  "buildOutputPath": "",
+  "runCommand": "<<folder>>/debug/my_project.exe",
+  "buildArgs": [
+    "build",
+    "--manifest-path",
+    "<<source_folder>>/Cargo.toml",
+    "--target-dir",
+    "<<output_folder>>"
+  ],
+  "runArgs": [],
+  "payload": null
+}

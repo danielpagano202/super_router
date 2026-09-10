@@ -1,0 +1,9 @@
+{
+  "buildCommand": "tsc.cmd",
+  "buildOutputPath": "",
+  "runCommand": "node",
+  "buildArgs": ["<<source_file>>", "--outDir", "<<output_folder>>"],
+  "runArgs": ["<<file>>"],
+  "payload": null,
+  "codeFile": "main.ts"
+}

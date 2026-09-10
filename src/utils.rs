@@ -1,7 +1,9 @@
-use std::{fs, path::{Path, PathBuf}};
+use std::{collections::HashMap, fs, path::{Path, PathBuf}};
 
 use regex::Regex;
 use walkdir::WalkDir;
+
+use serde_json::Value;
 
 pub fn find_file_by_regex(dir: &Path, pattern: &str) -> Option<std::path::PathBuf> {
     let re = Regex::new(pattern).unwrap();
@@ -67,4 +69,38 @@ pub fn find_files_by_regex_inverse(dir: &Path, pattern: &str) -> Vec<PathBuf> {
     }
 
     return files;
+}
+
+pub fn walk_json(
+    value: &Value,
+    previous: Vec<String>,
+    result: &mut HashMap<Vec<String>, Value>,
+) {
+    match value {
+        Value::Object(map) => {
+            for (key, value) in map {
+                let mut current = previous.clone();
+                current.push(key.clone());
+
+                walk_json(value, current, result);
+            }
+        }
+
+        Value::Array(array) => {
+            for (index, value) in array.iter().enumerate() {
+                let mut current = previous.clone();
+                current.push(index.to_string());
+
+                walk_json(value, current, result);
+            }
+        }
+
+        // We've reached an actual value
+        Value::String(_) |
+        Value::Number(_) |
+        Value::Bool(_) |
+        Value::Null => {
+            result.insert(previous, value.clone());
+        }
+    }
 }

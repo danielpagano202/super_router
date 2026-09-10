@@ -1,7 +1,6 @@
 {
   "buildCommand": "",
-  "buildOutputPath": "main.exe",
-  "runCommand": "<<file>>",
-  "buildArgs": null,
-  "runArgs": null
+  "buildOutputPath": "main.txt",
+  "runCommand": "brainfuck",
+  "runArgs": ["<<file>>"]
 }

@@ -1,0 +1,10 @@
+{
+  "buildCommand": "",
+  "buildOutputPath": "main.py",
+  "runCommand": "py",
+  "buildArgs": [],
+  "runArgs": ["-u", "<<file>>"],
+  "payload": {
+    "input": "string"
+  }
+}
