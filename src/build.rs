@@ -18,6 +18,7 @@ pub fn build_code(root_path: PathBuf) {
             run_args: vec!["-u".to_string(), "<<file>>".to_string()],
             payload: None,
             code_file: "main.py".to_string(),
+            ignore: false,
         }),
         ("js", RouteSettings{
             build_command: "".to_string(),
@@ -27,6 +28,7 @@ pub fn build_code(root_path: PathBuf) {
             run_args: vec!["<<file>>".to_string()],
             payload: None,
             code_file: "main.js".to_string(),
+            ignore: false,
         }),
         ("java", RouteSettings{
             build_command: "javac".to_string(),
@@ -36,6 +38,7 @@ pub fn build_code(root_path: PathBuf) {
             run_args: vec!["-cp".to_string(), "<<folder>>".to_string(), "main".to_string()],
             payload: None,
             code_file: "main.java".to_string(),
+            ignore: false,
         }),
     ]);
 
@@ -75,6 +78,12 @@ pub fn build_code(root_path: PathBuf) {
         } else {
             new_route_settings
         };
+
+        if route_settings.ignore {
+            println!("Ignoring file: {:?} due to ignore flag in settings.", &file);
+            continue;
+        }
+
         println!("Route settings for file {:?}: {:?}", &file, &route_settings);
         // Skips if no route settings are found for the file
         if route_settings == RouteSettings::default() || route_settings.run_command.is_empty() {

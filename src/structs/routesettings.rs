@@ -15,6 +15,8 @@ pub struct RouteSettings{
     pub payload: Option<serde_json::Value>,
     #[serde(default)]
     pub code_file: String,
+    #[serde(default)]
+    pub ignore: bool,
 }
 
 impl RouteSettings {
@@ -27,6 +29,7 @@ impl RouteSettings {
             run_args: if !other.run_args.is_empty() { other.run_args.clone() } else { self.run_args.clone() },
             payload: other.payload.clone().or_else(|| self.payload.clone()),
             code_file: if !other.code_file.is_empty() { other.code_file.clone() } else { self.code_file.clone() },
+            ignore: other.ignore || self.ignore,
         }
     }
     pub fn default() -> RouteSettings {
@@ -38,6 +41,7 @@ impl RouteSettings {
             build_args: Vec::new(),
             payload: None,
             code_file: "".to_string(), //TODO: Actually implement this
+            ignore: false,
         }
     }
 }
