@@ -17,8 +17,8 @@ rl.on("line", (line) => {
 
     // 1. Fixed key syntax ("type") and absolute path assembly
     const data = {
-      response_type: "htmlfile",
-      response_code: 200,
+      responseType: "htmlfile",
+      responseCode: 200,
       data: htmlPath,
     };
 

@@ -1,16 +1,30 @@
 use std::{collections::HashMap, fs, path::{Path, PathBuf}};
 
+use axum::Error;
 use regex::Regex;
 use walkdir::WalkDir;
 
 use serde_json::Value;
 
 pub fn find_file_by_regex(dir: &Path, pattern: &str) -> Option<std::path::PathBuf> {
-    let re = Regex::new(pattern).unwrap();
-    let entries = fs::read_dir(dir).ok()?;
+    println!("Searching for files matching pattern: [{}] in directory: {:?}", pattern, dir);
+    let re: Regex = match Regex::new(pattern) {
+        // 1. Unwraps the successfully compiled Regex
+        Ok(code) => code, 
+        
+        // 2. Handles the error and falls back to a default valid Regex
+        Err(error) => {
+            println!("Failed to compile regex pattern: {}, falling back to default.", error);
+            Regex::new("main.*").unwrap() 
+        }
+    };
+    let entries = fs::read_dir(dir).expect("Error opening directory");
+    println!("Scanning directory: {:?}", dir);
     for entry in entries.flatten() {
+        println!("Found entry: {:?}", entry.path());
         if entry.file_type().unwrap().is_file() {
             let file_name = entry.file_name().to_string_lossy().into_owned();
+            println!("Checking file: {}", file_name);
             if re.is_match(&file_name) {
                 return Some(entry.path());
             }
@@ -103,4 +117,12 @@ pub fn walk_json(
             result.insert(previous, value.clone());
         }
     }
+}
+
+pub fn replace_path(path: &str, replacements: &HashMap<&str, &str>) -> String {
+    let mut result = path.to_string();
+    for (key, value) in replacements {
+        result = result.replace(key, value);
+    }
+    result
 }

@@ -14,9 +14,13 @@ pub struct RouteSettings{
     #[serde(default)]
     pub payload: Option<serde_json::Value>,
     #[serde(default)]
-    pub code_file: String,
-    #[serde(default)]
     pub ignore: bool,
+    #[serde(default)]
+    pub root_folder: String,
+    #[serde(default)]
+    pub ignore_files: Vec<String>,
+    #[serde(default)]
+    pub process_path: String,
 }
 
 impl RouteSettings {
@@ -28,8 +32,10 @@ impl RouteSettings {
             build_args: if !other.build_args.is_empty() { other.build_args.clone() } else { self.build_args.clone() },
             run_args: if !other.run_args.is_empty() { other.run_args.clone() } else { self.run_args.clone() },
             payload: other.payload.clone().or_else(|| self.payload.clone()),
-            code_file: if !other.code_file.is_empty() { other.code_file.clone() } else { self.code_file.clone() },
             ignore: other.ignore || self.ignore,
+            root_folder: if !other.root_folder.is_empty() { other.root_folder.clone() } else { self.root_folder.clone() },
+            ignore_files: if !other.ignore_files.is_empty() { other.ignore_files.clone() } else { self.ignore_files.clone() },
+            process_path: if !other.process_path.is_empty() { other.process_path.clone() } else { self.process_path.clone() },
         }
     }
     pub fn default() -> RouteSettings {
@@ -40,8 +46,10 @@ impl RouteSettings {
             run_args: Vec::new(),
             build_args: Vec::new(),
             payload: None,
-            code_file: "".to_string(), //TODO: Actually implement this
             ignore: false,
+            root_folder: "".to_string(),
+            ignore_files: Vec::new(),
+            process_path: "".to_string(),
         }
     }
 }

@@ -1,7 +1,7 @@
 {
   "buildCommand": "cargo",
   "buildOutputPath": "",
-  "runCommand": "<<folder>>/debug/my_project.exe",
+  "runCommand": "<<folder>>/main.exe",
   "buildArgs": [
     "build",
     "--manifest-path",
@@ -10,5 +10,7 @@
     "<<output_folder>>"
   ],
   "runArgs": [],
-  "payload": null
+  "payload": null,
+  "rootFolder": "<<output_folder>>/debug",
+  "processPath": "main.exe"
 }

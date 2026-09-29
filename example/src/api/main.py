@@ -14,8 +14,8 @@ for line in sys.stdin:
         
         # 1. Fixed key syntax ("type") and absolute path assembly
         data = {
-           "response_type": "json",
-           "response_code": 200,
+           "responseType": "json",
+           "responseCode": 200,
            "data": line
         }
         

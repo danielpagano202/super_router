@@ -8,7 +8,6 @@ use crate::structs::routesettings::RouteSettings;
 
 
 pub fn build_code(root_path: PathBuf) {
-
     let route_settings: HashMap<&str, RouteSettings> = HashMap::from([
         ("py", RouteSettings{
             build_command: "".to_string(),
@@ -17,8 +16,10 @@ pub fn build_code(root_path: PathBuf) {
             build_args: vec![],
             run_args: vec!["-u".to_string(), "<<file>>".to_string()],
             payload: None,
-            code_file: "main.py".to_string(),
             ignore: false,
+            root_folder: "".to_string(),
+            ignore_files: vec![],
+            process_path: "".to_string(),
         }),
         ("js", RouteSettings{
             build_command: "".to_string(),
@@ -27,8 +28,10 @@ pub fn build_code(root_path: PathBuf) {
             build_args: vec![],
             run_args: vec!["<<file>>".to_string()],
             payload: None,
-            code_file: "main.js".to_string(),
             ignore: false,
+            root_folder: "".to_string(),
+            ignore_files: vec![],
+            process_path: "".to_string(),
         }),
         ("java", RouteSettings{
             build_command: "javac".to_string(),
@@ -37,8 +40,10 @@ pub fn build_code(root_path: PathBuf) {
             build_args: vec!["-d".to_string(), "<<output_folder>>".to_string(), "<<source_file>>".to_string()],
             run_args: vec!["-cp".to_string(), "<<folder>>".to_string(), "main".to_string()],
             payload: None,
-            code_file: "main.java".to_string(),
             ignore: false,
+            root_folder: "".to_string(),
+            ignore_files: vec![],
+            process_path: "".to_string(),
         }),
     ]);
 
@@ -92,7 +97,7 @@ pub fn build_code(root_path: PathBuf) {
         }
 
         // Gets the file path of the build output file
-        let mut build_output_file_name = &route_settings.build_output_path;
+        let build_output_file_name = &route_settings.build_output_path;
         let build_output_file_path = std::path::absolute(file_folder.join(&build_output_file_name)).unwrap();
 
         // Gets the folder the build output will go to and the file path of the build output file in the output folder
@@ -111,10 +116,12 @@ pub fn build_code(root_path: PathBuf) {
             let mut final_args: Vec<String> = Vec::new();
             for arg in &route_settings.build_args {
                 let mut formatted_arg = arg.to_string();
-                formatted_arg = formatted_arg.replace("<<source_file>>", std::path::absolute(&file).unwrap().to_str().unwrap());
-                formatted_arg = formatted_arg.replace("<<source_folder>>", file_folder.to_str().unwrap());
-                formatted_arg = formatted_arg.replace("<<output_file>>", build_output_file_path.to_str().unwrap());
-                formatted_arg = formatted_arg.replace("<<output_folder>>", router_output_folder_path.to_str().unwrap());
+                formatted_arg = utils::replace_path(&formatted_arg, &HashMap::from([
+                    ("<<source_file>>", std::path::absolute(&file).unwrap().to_str().unwrap()),
+                    ("<<source_folder>>", file_folder.to_str().unwrap()),
+                    ("<<output_file>>", build_output_file_path.to_str().unwrap()),
+                    ("<<output_folder>>", router_output_folder_path.to_str().unwrap()),
+                ]));
                 
                 final_args.push(formatted_arg);
             }
@@ -142,8 +149,21 @@ pub fn build_code(root_path: PathBuf) {
         // Copies any other files in the folder that aren't the main file to the output folder
         let other_files = utils::find_files_by_regex_inverse(&file_folder, r"^main\.");
         for other in other_files{
+            // TODO: Ensure this works
+            if route_settings.ignore_files.contains(&other.file_name().unwrap().to_str().unwrap().to_string()) || other.file_name().unwrap().to_str().unwrap() == "settings.json" {
+                continue;
+            }
+
             let other_file_name = other.file_name().unwrap();
-            let router_other_file_path = std::path::absolute(&router_output_folder_path.join(other_file_name)).unwrap();
+
+            let settings_file_path = if route_settings.root_folder.is_empty() { "<<output_folder>>" } else { &route_settings.root_folder };
+            let other_file_path_str = utils::replace_path(settings_file_path, &HashMap::from([
+                ("<<output_folder>>", router_output_folder_path.to_str().unwrap()),
+            ]));
+            let other_file_path = std::path::PathBuf::from(other_file_path_str);
+            let router_other_file_path = std::path::absolute(other_file_path.join(other_file_name)).unwrap();
+
+            println!("Copying extra file from {:?} to {:?}", &other, &router_other_file_path);
             match fs::copy(&other, &router_other_file_path) {
                 Ok(_) => println!("Successfully copied extra file to {:?}", &router_output_file_path),
                 Err(e) => eprintln!("Failed to copy extra file: {}", e),

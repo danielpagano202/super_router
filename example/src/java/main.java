@@ -26,7 +26,7 @@ public class main {
                     // 1 & 2. Create the data map and format it as a single-line JSON string
                     // Note: We use escaped quotes manually to avoid heavy external dependencies like Jackson/Gson
                     String jsonResponse = String.format(
-                        "{\"response_type\":\"%s\",\"response_code\":%d,\"data\":\"%s\"}",
+                        "{\"responseType\":\"%s\",\"responseCode\":%d,\"data\":\"%s\"}",
                         "text", 200, "hello"
                     );
 

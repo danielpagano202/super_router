@@ -44,7 +44,7 @@ int main() {
 
             // Convert data layout to a clean single-line JSON string
             snprintf(json_response, sizeof(json_response),
-                     "{\"response_type\": \"htmlfile\", \"response_code\": 200, \"data\": \"%s\"}",
+                     "{\"responseType\": \"htmlfile\", \"responseCode\": 200, \"data\": \"%s\"}",
                      escaped_html_path);
             
             // CRUCIAL: print the JSON line and force flush it to Rust immediately

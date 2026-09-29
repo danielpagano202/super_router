@@ -3,6 +3,7 @@ use std::env;
 use std::io::{self, BufRead, Write};
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ResponseData {
     response_type: &'static str,
     response_code: u16,

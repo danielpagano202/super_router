@@ -73,6 +73,7 @@ enum ResponseType {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct RouterResponse {
     response_code: u16,
     data: String,
@@ -82,7 +83,9 @@ struct RouterResponse {
 
 
 fn interpret_response(response: &str) -> RouterResponse {
+    println!("Interpreting response: {}", response);
     serde_json::from_str::<RouterResponse>(response).unwrap_or_else(|_| {
+        println!("Failed to parse response: {}", response);
         // If parsing fails, return a default RouterResponse
         RouterResponse {
             response_code: 500,
@@ -156,48 +159,51 @@ fn match_json(v_type: &str, value: &serde_json::Value) -> bool {
 async fn spawn_route_process<'a>(path: &str, processes: &'a mut tokio::sync::MutexGuard<'_, HashMap<String, AsyncProcess>>) -> Option<&'a mut AsyncProcess> {
     
     if let std::collections::hash_map::Entry::Vacant(entry) = processes.entry(path.to_string()) {
+        // Get route settings
+        let route_settings = get_route_settings(path);
+
+        println!("Route settings for {}: {:?}", path, route_settings);
+       
         // The output folder
         let root_output_path = std::path::absolute(&*ROOT_PATH.lock().unwrap()).unwrap(); 
 
         // Gets the directory where the process is in
         let web_path = std::path::Path::new(&path).strip_prefix("/").unwrap_or(std::path::Path::new(&path));
-        let process_dir = root_output_path.join(&web_path);
+        let process_dir = if !route_settings.root_folder.is_empty() {
+            PathBuf::from(utils::replace_path(&route_settings.root_folder, &HashMap::from([("<<output_folder>>", root_output_path.join(&web_path).to_str().unwrap())])))
+        } else {
+            root_output_path.join(&web_path)
+        };
+
+
 
         // Gets the actual process
-        let process_path = utils::find_file_by_regex(Path::new(&process_dir), "main*");
-
-        let route_settings = get_route_settings(path);
-
-        println!("Route settings for {}: {:?}", path, route_settings);
-    
-
+        let pattern = if route_settings.process_path.is_empty() { "main*".to_string() } else { utils::replace_path(&route_settings.process_path, &HashMap::from([("<<folder>>", process_dir.to_str().unwrap())]))  };
+        println!("Looking for process matching pattern: {} in directory: {}", pattern, process_dir.to_str().unwrap());
+        let process_path = utils::find_file_by_regex(Path::new(&process_dir), &pattern);
+        println!("Found process path: {:?}", process_path);
         let mut final_args: Vec<String> = Vec::new();
-        println!("past");
+
         if !route_settings.run_args.is_empty() {
             println!("Is not empty");
             for arg in &route_settings.run_args {
                 println!("Processing arg: {}", arg);
-                if arg.contains("<<file>>") {
-                    let final_arg = arg.replace("<<file>>", process_path.as_ref().expect("Process path is None").to_str().unwrap());
-                    final_args.push(final_arg);
-                } else if arg.contains("<<folder>>") {
-                    let final_arg = arg.replace("<<folder>>", process_dir.to_str().unwrap());
-                    final_args.push(final_arg);
-                } else {
-                    final_args.push(arg.clone());
-                }
+                let mut formatted_arg = arg.to_string();
+                formatted_arg = utils::replace_path(&formatted_arg, &HashMap::from([
+                    ("<<file>>", process_path.as_ref().expect("Process path is None").to_str().unwrap()),
+                    ("<<folder>>", process_dir.to_str().unwrap()),
+                ]));
+                final_args.push(formatted_arg);
             }
 
         }
 
         let mut final_route_command = route_settings.run_command.clone();
-
-        if route_settings.run_command.contains("<<file>>"){
-            final_route_command = final_route_command.replace("<<file>>", process_path.as_ref().expect("Process path is None").to_str().unwrap())
-        }
-        if route_settings.run_command.contains("<<folder>>") {
-            final_route_command = final_route_command.replace("<<folder>>", process_dir.to_str().unwrap())
-        }
+        
+        final_route_command = utils::replace_path(&final_route_command, &HashMap::from([
+            ("<<file>>", process_path.as_ref().expect("Process path is None").to_str().unwrap()),
+            ("<<folder>>", process_dir.to_str().unwrap()),
+        ]));
 
         let final_args_pointers: Vec<&str> = final_args.iter().map(|s| s.as_str()).collect();
         println!("Spawning process for path: {} with command: {} and args: {:?}", path, final_route_command, final_args);
@@ -212,7 +218,12 @@ static ROOT_PATH: LazyLock<Mutex<PathBuf>> = LazyLock::new(|| Mutex::new(PathBuf
 async fn handle_call(req: Request<Body>) -> impl IntoResponse {
     let path = req.uri().path().to_string();
     let method = req.method().to_string();
-    let cookies = req.headers().get("cookie").unwrap().to_str().unwrap_or("").to_string();
+    let cookies = match req.headers().get("cookie"){
+        Some(cookies) => {
+            cookies.to_str().unwrap_or("").to_string()
+        },
+        None => "".to_string(),
+    };
 
     let bytes = to_bytes(req.into_body(), 10 * 1024 * 1024).await.unwrap();
     let body = String::from_utf8(bytes.to_vec()).unwrap();
@@ -220,7 +231,7 @@ async fn handle_call(req: Request<Body>) -> impl IntoResponse {
     let mut processes = ASYNC_GLOBAL_MAP.lock().await;
     
     let current_process = spawn_route_process(&path, &mut processes).await.expect("No process was made!");
-
+    println!("Got the currennt process");
     let route_settings = get_route_settings(&path);
     
     let mut body_types: HashMap<Vec<String>, serde_json::Value> = HashMap::new();
@@ -264,14 +275,19 @@ async fn handle_call(req: Request<Body>) -> impl IntoResponse {
     };
     println!("Route request for path {}: {:?}", path, route_request);
     let _ = current_process.write(&(serde_json::to_string(&route_request).unwrap().to_string() + "\n")).await;
+
+    println!("Wrote data");
+
     let result = current_process.read().await.unwrap_or("".to_string());
+
+    println!("Read data: {}", result);
 
     if result.is_empty() {
         return (StatusCode::INTERNAL_SERVER_ERROR, "No response from process").into_response();
     }
 
     let response = interpret_response(&result);
-
+    println!("Interpreted response");
     return convert_router_response(&response)
 
 }

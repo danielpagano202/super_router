@@ -1,7 +1,6 @@
 {
   "buildCommand": "",
-  "buildOutputPath": "main.txt",
-  "runCommand": "brainfuck",
-  "runArgs": ["<<file>>"],
-  "ignore": true
+  "buildOutputPath": "main.bf",
+  "runCommand": "brainfk",
+  "runArgs": ["<<file>>"]
 }

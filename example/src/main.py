@@ -11,8 +11,8 @@ for line in sys.stdin:
         
         # 1. Fixed key syntax ("type") and absolute path assembly
         data = {
-           "response_type": "htmlfile",
-           "response_code": 200,
+           "responseType": "htmlfile",
+           "responseCode": 200,
            "data": html_path
         }
         
