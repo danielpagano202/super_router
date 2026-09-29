@@ -5,6 +5,7 @@ mod webserver;
 mod build;
 mod utils;
 mod structs;
+mod create;
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -30,6 +31,9 @@ enum Commands {
         // The path to the folder you want to build
         folder: PathBuf,
     },
+    Create{
+
+    },
     /// Another optional subcommand (like ./program stop)
     Stop,
 }
@@ -48,6 +52,10 @@ fn main() {
         Commands::Build { folder } => {
             println!("Building code in folder: {:?}", folder);
             build::build_code(PathBuf::from(folder));
+        },
+        Commands::Create { } => {
+            println!("Creating new project...");
+            _ = create::run();
         }
         Commands::Stop => {
             println!("Stopping all active operations.");

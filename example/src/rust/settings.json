@@ -12,5 +12,6 @@
   "runArgs": [],
   "payload": null,
   "rootFolder": "<<output_folder>>/debug",
-  "processPath": "main.exe"
+  "processPath": "main.exe",
+  "ignore": true
 }

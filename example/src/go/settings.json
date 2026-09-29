@@ -1,0 +1,6 @@
+{
+  "buildCommand": "go",
+  "buildOutputPath": "",
+  "runCommand": "<<file>>",
+  "buildArgs": ["build", "-o", "<<output_folder>>\\main.exe", "<<source_file>>"]
+}

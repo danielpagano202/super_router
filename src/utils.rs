@@ -1,13 +1,10 @@
 use std::{collections::HashMap, fs, path::{Path, PathBuf}};
-
-use axum::Error;
 use regex::Regex;
 use walkdir::WalkDir;
 
 use serde_json::Value;
 
 pub fn find_file_by_regex(dir: &Path, pattern: &str) -> Option<std::path::PathBuf> {
-    println!("Searching for files matching pattern: [{}] in directory: {:?}", pattern, dir);
     let re: Regex = match Regex::new(pattern) {
         // 1. Unwraps the successfully compiled Regex
         Ok(code) => code, 
@@ -19,7 +16,6 @@ pub fn find_file_by_regex(dir: &Path, pattern: &str) -> Option<std::path::PathBu
         }
     };
     let entries = fs::read_dir(dir).expect("Error opening directory");
-    println!("Scanning directory: {:?}", dir);
     for entry in entries.flatten() {
         println!("Found entry: {:?}", entry.path());
         if entry.file_type().unwrap().is_file() {
@@ -34,6 +30,7 @@ pub fn find_file_by_regex(dir: &Path, pattern: &str) -> Option<std::path::PathBu
     return None;
 }
 
+/*
 pub fn find_files_by_regex(dir: &Path, pattern: &str) -> Vec<PathBuf> {
     let re = Regex::new(pattern).unwrap();
     let mut files: Vec<PathBuf> = Vec::new();
@@ -50,7 +47,7 @@ pub fn find_files_by_regex(dir: &Path, pattern: &str) -> Vec<PathBuf> {
     }
 
     return files;
-}
+}*/
 
 pub fn find_files_by_regex_recursive(dir: &Path, pattern: &str) -> Vec<PathBuf> {
     let re = Regex::new(pattern).unwrap();
