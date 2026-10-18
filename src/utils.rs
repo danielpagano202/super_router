@@ -123,3 +123,26 @@ pub fn replace_path(path: &str, replacements: &HashMap<&str, &str>) -> String {
     }
     result
 }
+
+pub fn get_folder_by_regex(path: &Path, pattern: &str) -> Option<PathBuf> {
+    let re = Regex::new(pattern).unwrap();
+    if path.is_dir() {
+        for entry in fs::read_dir(&path).unwrap() {
+            let entry = entry.unwrap();
+            if entry.file_type().unwrap().is_dir() {
+                let folder_name = entry.file_name().to_string_lossy().into_owned();
+                if re.is_match(&folder_name) {
+                    return Some(entry.path());
+                }
+            }
+        }
+    }
+    None
+}
+
+pub fn get_regex_matches(text: &str, pattern: &str) -> Vec<String> {
+    let re = Regex::new(pattern).unwrap();
+    re.captures_iter(text)
+        .filter_map(|cap| cap.get(1).map(|m| m.as_str().to_string()))
+        .collect()
+}

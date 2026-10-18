@@ -8,4 +8,5 @@ pub struct RouteRequest {
     pub cookies: String,
     pub method: String,
     pub is_valid: bool,
+    pub params: std::collections::HashMap<String, String>,
 }

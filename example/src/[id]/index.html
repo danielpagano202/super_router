@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Inline variable injection for the tab title -->
+    <title>{{ title }} (ID: {{ id }})</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 0 20px;
+        line-height: 1.6;
+      }
+      .card {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #fafafa;
+      }
+      .btn {
+        display: inline-block;
+        background: #0076ff;
+        color: white;
+        padding: 8px 16px;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <!-- Renders the title variable -->
+      <h1>{{ title }}</h1>
+
+      <!-- Renders the id variable as plain text -->
+      <p><strong>Database ID:</strong> {{ id }}</p>
+
+      <!-- Uses the id variable inside HTML attributes -->
+      <div>
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -12,11 +12,13 @@ for line in sys.stdin:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         html_path = os.path.join(script_dir, "index.html")
         
+        line_dict = json.loads(line)
+
         # 1. Fixed key syntax ("type") and absolute path assembly
         data = {
            "responseType": "json",
            "responseCode": 200,
-           "data": line
+           "data": line_dict["params"]["id"]
         }
         
         # 2. Convert dictionary to a clean single-line JSON string

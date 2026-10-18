@@ -8,10 +8,10 @@ use crate::structs::create_app::CreateApp;
 
 
 fn draw_simple_list(frame: &mut Frame, area: Rect, app: &mut CreateApp) {
-    let max_shown_items = 3;
+    
     let current_list_set = &app.list_sets[app.current_step.clone() as usize];
     let items = current_list_set.items.clone();
-
+    let max_shown_items = min((area.height - 2) as usize, items.len());
     // 2. Convert the text strings into ListItems
     let list_items: Vec<ListItem> = items
         .iter()
@@ -49,7 +49,7 @@ fn draw_simple_list(frame: &mut Frame, area: Rect, app: &mut CreateApp) {
 
     // 3. Build the List widget with optional borders and styling
     let simple_list = List::new(items_slice)
-        .block(Block::bordered().title(current_list_set.title))
+        .block(Block::bordered().title(current_list_set.title.to_string()))
         .style(Style::default().fg(Color::White));
 
     // 4. Render it directly (no ListState reference required)
